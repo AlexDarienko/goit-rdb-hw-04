@@ -1,0 +1,144 @@
+p1
+
+CREATE DATABASE LibraryManagement;
+USE LibraryManagement;
+
+CREATE TABLE authors (
+    author_id INT AUTO_INCREMENT PRIMARY KEY,
+    author_name VARCHAR(100)
+);
+
+CREATE TABLE genres (
+    genre_id INT AUTO_INCREMENT PRIMARY KEY,
+    genre_name VARCHAR(100)
+);
+
+CREATE TABLE books (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(200),
+    publication_year YEAR,
+    author_id INT,
+    genre_id INT,
+    FOREIGN KEY (author_id) REFERENCES authors(author_id),
+    FOREIGN KEY (genre_id) REFERENCES genres(genre_id)
+);
+
+CREATE TABLE users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100),
+    email VARCHAR(100)
+);
+
+CREATE TABLE borrowed_books (
+    borrow_id INT AUTO_INCREMENT PRIMARY KEY,
+    book_id INT,
+    user_id INT,
+    borrow_date DATE,
+    return_date DATE,
+    FOREIGN KEY (book_id) REFERENCES books(book_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+--------------------------------------------------------
+
+p2
+
+INSERT INTO authors (author_name) VALUES ('Оксана Забужко');
+
+INSERT INTO genres (genre_name) VALUES ('Роман');
+
+INSERT INTO books (title, publication_year, author_id, genre_id)
+VALUES ('Польові дослідження з українського сексу', 1996, 1, 1);
+
+INSERT INTO users (username, email) VALUES ('ivan_petrenko', 'ivan@example.com');
+
+INSERT INTO borrowed_books (book_id, user_id, borrow_date, return_date)
+VALUES (1, 1, '2025-07-01', '2025-07-10');
+
+-------------------------------------------------------------
+
+p3
+
+SELECT *
+FROM order_details
+INNER JOIN orders ON order_details.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN products ON order_details.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN shippers ON orders.shipper_id = shippers.id
+INNER JOIN suppliers ON products.supplier_id = suppliers.id
+
+-------------------------------------------------------------
+
+p4
+
+SELECT COUNT(*) AS total_rows
+FROM order_details
+INNER JOIN orders ON order_details.order_id = orders.id
+INNER JOIN customers ON orders.customer_id = customers.id
+INNER JOIN products ON order_details.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+INNER JOIN shippers ON orders.shipper_id = shippers.id
+INNER JOIN suppliers ON products.supplier_id = suppliers.id
+
+SELECT *
+FROM order_details
+LEFT JOIN orders ON order_details.order_id = orders.id
+LEFT JOIN customers ON orders.customer_id = customers.id
+LEFT JOIN products ON order_details.product_id = products.id
+LEFT JOIN categories ON products.category_id = categories.id
+LEFT JOIN employees ON orders.employee_id = employees.employee_id
+LEFT JOIN shippers ON orders.shipper_id = shippers.id
+LEFT JOIN suppliers ON products.supplier_id = suppliers.id
+
+LEFT JOIN включає всі рядки з order_details, навіть якщо немає відповідного в orders. Кількість рядків може збільшитися або залишитись такою самою, але ніколи не зменшиться. Це корисно для пошуку “осиротілих” рядків.
+
+SELECT *
+FROM order_details
+INNER JOIN orders ON order_details.order_id = orders.id
+INNER JOIN employees ON orders.employee_id = employees.employee_id
+WHERE employees.employee_id > 3 AND employees.employee_id <= 10;
+
+SELECT 
+    categories.name,
+    COUNT(*) AS row_count,
+    AVG(order_details.quantity) AS avg_quantity
+FROM order_details
+INNER JOIN products ON order_details.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+GROUP BY categories.name;
+
+SELECT 
+    categories.name,
+    COUNT(*) AS row_count,
+    AVG(order_details.quantity) AS avg_quantity
+FROM order_details
+INNER JOIN products ON order_details.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+GROUP BY categories.name
+HAVING AVG(order_details.quantity) > 21;
+
+SELECT 
+    categories.name,
+    COUNT(*) AS row_count,
+    AVG(order_details.quantity) AS avg_quantity
+FROM order_details
+INNER JOIN products ON order_details.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+GROUP BY categories.name
+HAVING AVG(order_details.quantity) > 21
+ORDER BY row_count DESC;
+
+SELECT 
+    categories.name,
+    COUNT(*) AS row_count,
+    AVG(order_details.quantity) AS avg_quantity
+FROM order_details
+INNER JOIN products ON order_details.product_id = products.id
+INNER JOIN categories ON products.category_id = categories.id
+GROUP BY categories.name
+HAVING AVG(order_details.quantity) > 21
+ORDER BY row_count DESC
+LIMIT 4 OFFSET 1;
